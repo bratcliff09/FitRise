@@ -6,6 +6,8 @@ import supabase from "./modules/supabase.js";
 
 const loginButton = document.querySelector(".container button");
 loginButton.onclick = (evnt) => login(evnt);
+const guestLoginButton = document.querySelector("#guest-login");
+guestLoginButton.onclick = (event) => guestLogin();
 
 init();
 async function init() {
@@ -49,6 +51,7 @@ async function login(evnt) {
 
   //Call backend
   loginButton.disabled = true;
+  guestLoginButton.disabled = true;
   const { data, error } = await supabase.auth.signInWithPassword({
     email: email,
     password: password,
@@ -65,11 +68,55 @@ async function login(evnt) {
       createModal("Unexpected Error!! Please Try Again Later!", true);
     }
     loginButton.disabled = false;
+    guestLoginButton.disabled = false;
     return;
   } else if (!data.session || !data.user) {
     createModal("Unexpected Error!! Please Try Again Later!", true);
     console.log("Alert to devs To check the backend logs");
     loginButton.disabled = false;
+    guestLoginButton.disabled = false;
+    return;
+  }
+
+  //Redirect on successful login
+  localStorage.setItem("loggedIn", "true");
+  window.location.href = "index.html";
+}
+
+async function guestLogin() {
+  const email = "john@example.com";
+  const password = "1234567890";
+
+  removeAllErrDisplays();
+
+  //Call backend
+  loginButton.disabled = true;
+  guestLoginButton.disabled = true;
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: password,
+  });
+
+  if (error) {
+    if (error.code === "invalid_credentials") {
+      //Caused by wrong/no-account email or wrong password
+      displayErrBorder(emailInput, true);
+      displayErrBorder(passwordInput, true);
+      displayErrTag(emailInput, "Incorrect email or password");
+    } else {
+      console.log(error.code);
+      createModal("Unexpected Error!! Please Try Again Later!", true);
+    }
+    loginButton.disabled = false;
+    guestLoginButton.disabled = false;
+
+    return;
+  } else if (!data.session || !data.user) {
+    createModal("Unexpected Error!! Please Try Again Later!", true);
+    console.log("Alert to devs To check the backend logs");
+    loginButton.disabled = false;
+    guestLoginButton.disabled = false;
+
     return;
   }
 

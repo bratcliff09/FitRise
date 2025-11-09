@@ -114,6 +114,7 @@ function displayBaseUserInfo(userData) {
   document.getElementById("user-height").textContent = height;
 
   let weight = kgToLbs(userData.weight);
+  weight = Math.round(weight * 10) / 10; //Round to nearest tenth
   document.getElementById("user-weight").textContent = weight + " lbs";
 
   document.getElementById("user-points").textContent =
